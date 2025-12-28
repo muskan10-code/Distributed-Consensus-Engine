@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package raft;
+
+option go_package = "/raft;raft";
+// Leader Election (Q3) messages
+message VoteRequest {
+  int32 term = 1;
+  int32 candidate_id = 2;
+}
+
+message VoteResponse {
+  int32 term = 1;
+  bool vote_granted = 2;
+}
+
+// Log replication (Q4) messages
+message LogEntry {
+  int32 term = 1;        // the term when this entry was received by leader
+  int32 index = 2;       // the index of this entry in the log
+  string operation = 3;  // the actual client operation/command
+}
+
+// For Q4: we also want to replicate the entire log (like a simplified approach).
+message AppendRequest {
+  int32 term = 1;
+  int32 leader_id = 2;
+  repeated LogEntry entries = 3;  // entire log or just newly appended
+  int32 leader_commit = 4;        // index of leader's last committed entry
+}
+
+message AppendResponse {
+  int32 term = 1;
+  bool success = 2;
+}
+
+// For Q4: A client can send a request to any node. That node should forward to leader if needed.
+message ClientRequest {
+  string operation = 1;  // e.g. "put X=5"
+}
+
+// The node returns to the client whether the request was successful
+// and any response message, if you have a result.
+message ClientResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// The Raft service for both Q3 (election) and Q4 (log replication)
+service Raft {
+  // Q3: Leader election
+  rpc RequestVote (VoteRequest) returns (VoteResponse);
+  rpc AppendEntries (AppendRequest) returns (AppendResponse);
+
+  // Q4: Log replication
+  // We'll let a client "SendClientRequest" to any node
+  rpc SendClientRequest (ClientRequest) returns (ClientResponse);
+}

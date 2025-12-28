@@ -1,0 +1,10 @@
+{
+  "name": "twopc-decision",
+  "version": "1.0.0",
+  "main": "decision_participant.js",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.8.14",
+    "@grpc/proto-loader": "^0.7.5",
+    "minimist": "^1.2.8"
+  }
+}

@@ -1,0 +1,60 @@
+services:
+  node1:
+    build:
+      context: .
+    container_name: python_node1
+    hostname: node1
+    ports:
+      - "50051:50051"
+    command: [ "python", "raft_node.py", "1" ]
+    networks:
+      - raft_net
+
+  node2:
+    build:
+      context: .
+    container_name: python_node2
+    hostname: node2
+    ports:
+      - "50052:50052"
+    command: [ "python", "raft_node.py", "2" ]
+    networks:
+      - raft_net
+
+  node3:
+    build:
+      context: .
+    container_name: python_node3
+    hostname: node3
+    ports:
+      - "50053:50053"
+    command: [ "python", "raft_node.py", "3" ]
+    networks:
+      - raft_net
+
+  node4:
+    build:
+      context: .
+    container_name: python_node4
+    hostname: node4
+    ports:
+      - "50054:50054"
+    command: [ "python", "raft_node.py", "4" ]
+    networks:
+      - raft_net
+
+  node5:
+    build:
+      context: .
+    container_name: python_node5
+    hostname: node5
+    ports:
+      - "50055:50055"
+    command: [ "python", "raft_node.py", "5" ]
+    networks:
+      - raft_net
+
+networks:
+  raft_net:
+    name: raft_net
+    driver: bridge

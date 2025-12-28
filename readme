@@ -1,0 +1,133 @@
+CSE 5306-002 
+Project Assignment 2: Implementing Consensus Algorithms, 2PC and Raft 
+
+Aaryan Mori - 1002166689
+Muskan Arora - 1002160963
+
+Q1 and Q2 
+
+How to Run the System
+
+Prerequisites
+
+- Docker and Docker Compose must be installed on your machine.
+
+Steps
+
+1. Build the Docker Images
+
+   - For the Python Voting Service:
+     
+     cd q1_python
+     docker build -t twopc-voting:latest .
+     
+
+   - For the Node.js Decision Service:
+  
+     cd q2_node
+     docker build -t twopc-decision:latest .
+     
+
+2. Prepare the Docker Compose File
+
+   Use the provided `docker-compose.yml` file (located in root directory) which defines containers for all 5 nodes and the coordinator services.
+
+3. Run the System
+
+   docker-compose up
+
+4. Prepare the Docker Compose File
+
+	•	Phase Voting of Node <nodeX> receives RPC Vote from Phase Voting of Node coordinator
+	•	Phase Voting of Node <nodeX> sends RPC ReceiveVote to Phase Decision of Node nodeX_decision:50052
+	•	Phase Decision of Node coordinatorNode sends RPC GetVote to Phase Decision of Node nodeX_decision:50052
+	•	Phase Decision of Node coordinatorNode sends RPC GlobalDecision to Phase Decision of Node nodeX_decision:50052
+	•	Transaction tx354: Final decision applied: COMMIT/ABORT
+
+
+Q3: 
+Prerequisites:
+Ensure you have the following installed on your machine:
+• Python 3.9+
+• Docker 
+
+How to Compile and Run
+Python (Q3) – Leader Election
+Navigate to Q3_python:
+cd Q3_python
+
+Build the Docker images:
+
+docker compose build
+
+Start the 5-node Python cluster:
+docker compose up
+Observe the logs. Within a few seconds, one Python node (1..5) should declare itself leader.
+
+Q4: 
+Prerequisites:
+Ensure you have the following installed on your machine:
+• Go 1.18+
+• Docker, grpcurl
+
+
+ Go (Q4) – Log Replication
+
+Open a new terminal, go to Q4_golang:
+cd ../Q4_golang
+
+Build the Docker images:
+
+docker compose build
+
+Start the 5-node Go cluster:
+
+docker compose up
+
+You will see logs for nodes 6..10. Since we rely on the Python leader, these Go nodes typically remain followers and wait for heartbeats from whichever Python node is leader.
+
+Confirm Cross-Communication
+the Python leader will send heartbeats and log entries to the Go nodes.
+
+Check the logs on a Go node (e.g. node6) to see something like:
+
+[Node 6] runs RPC AppendEntries called by Node 3 (Term 1)
+[Node 6] Heartbeat/log accepted from leader 3 (Term 1). Log size = 0, commitIndex=0
+
+
+Sending a Client Request
+To test log replication from the Python leader to the Go nodes:
+
+Identify the Python leader. Suppose it’s node5 and you mapped port 50055:50055 in the Python docker-compose.yml.
+
+From your host (assuming you have grpcurl installed), run:
+
+docker exec -it python_node1 /bin/sh
+apk add --no-cache grpcurl
+
+
+grpcurl -plaintext \
+  -proto raft.proto \
+  -d '{"operation":"PUT x=5"}' \
+  node5:50055 \
+  raft.Raft/SendClientRequest
+
+Observe the Python leader logs:
+
+[Node 5] (LEADER) appended operation 'PUT x=5' ...
+sends RPC AppendEntries to Node 6 ...
+
+Observe the Go logs, e.g. node6:
+
+[Node 6] Heartbeat/log accepted from leader 5 (Term X). Log size = 1, commitIndex=1
+This shows the log entry was replicated to the Go side.
+
+
+
+
+References:
+Raft Paper: “In Search of an Understandable Consensus Algorithm” by Diego Ongaro and John Ousterhout.
+Official Go gRPC Docs: https://grpc.io/docs/languages/go
+Official Python gRPC Docs: https://grpc.io/docs/languages/python
+Protobuf: https://developers.google.com/protocol-buffers
+In order to refine the design and implementation details of our system, we consulted ChatGPT (OpenAI, 2023) for suggestions and clarifications on various technical aspects.

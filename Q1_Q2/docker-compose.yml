@@ -1,0 +1,248 @@
+version: "3.8"
+services:
+  # Node 1 containers
+  node1_voting:
+    image: twopc-voting:latest
+    container_name: node1_voting
+    command:
+      [
+        "python",
+        "participant.py",
+        "--node_id",
+        "node1",
+        "--port",
+        "50051",
+        "--decision_address",
+        "node1_decision:50052",
+      ]
+    ports:
+      - "5101:50051"
+    networks:
+      - twopc-net
+
+  node1_decision:
+    image: twopc-decision:latest
+    container_name: node1_decision
+    command:
+      [
+        "node",
+        "decision_participant.js",
+        "--node_id",
+        "node1",
+        "--port",
+        "50052",
+        "--voting_address",
+        "node1_voting:50051",
+      ]
+    ports:
+      - "5201:50052"
+    networks:
+      - twopc-net
+
+  # Node 2 containers
+  node2_voting:
+    image: twopc-voting:latest
+    container_name: node2_voting
+    command:
+      [
+        "python",
+        "participant.py",
+        "--node_id",
+        "node2",
+        "--port",
+        "50051",
+        "--decision_address",
+        "node2_decision:50052",
+      ]
+    ports:
+      - "5102:50051"
+    networks:
+      - twopc-net
+
+  node2_decision:
+    image: twopc-decision:latest
+    container_name: node2_decision
+    command:
+      [
+        "node",
+        "decision_participant.js",
+        "--node_id",
+        "node2",
+        "--port",
+        "50052",
+        "--voting_address",
+        "node2_voting:50051",
+      ]
+    ports:
+      - "5202:50052"
+    networks:
+      - twopc-net
+
+  # Node 3 containers
+  node3_voting:
+    image: twopc-voting:latest
+    container_name: node3_voting
+    command:
+      [
+        "python",
+        "participant.py",
+        "--node_id",
+        "node3",
+        "--port",
+        "50051",
+        "--decision_address",
+        "node3_decision:50052",
+      ]
+    ports:
+      - "5103:50051"
+    networks:
+      - twopc-net
+
+  node3_decision:
+    image: twopc-decision:latest
+    container_name: node3_decision
+    command:
+      [
+        "node",
+        "decision_participant.js",
+        "--node_id",
+        "node3",
+        "--port",
+        "50052",
+        "--voting_address",
+        "node3_voting:50051",
+      ]
+    ports:
+      - "5203:50052"
+    networks:
+      - twopc-net
+
+  # Node 4 containers
+  node4_voting:
+    image: twopc-voting:latest
+    container_name: node4_voting
+    command:
+      [
+        "python",
+        "participant.py",
+        "--node_id",
+        "node4",
+        "--port",
+        "50051",
+        "--decision_address",
+        "node4_decision:50052",
+      ]
+    ports:
+      - "5104:50051"
+    networks:
+      - twopc-net
+
+  node4_decision:
+    image: twopc-decision:latest
+    container_name: node4_decision
+    command:
+      [
+        "node",
+        "decision_participant.js",
+        "--node_id",
+        "node4",
+        "--port",
+        "50052",
+        "--voting_address",
+        "node4_voting:50051",
+      ]
+    ports:
+      - "5204:50052"
+    networks:
+      - twopc-net
+
+  # Node 5 containers
+  node5_voting:
+    image: twopc-voting:latest
+    container_name: node5_voting
+    command:
+      [
+        "python",
+        "participant.py",
+        "--node_id",
+        "node5",
+        "--port",
+        "50051",
+        "--decision_address",
+        "node5_decision:50052",
+      ]
+    ports:
+      - "5105:50051"
+    networks:
+      - twopc-net
+
+  node5_decision:
+    image: twopc-decision:latest
+    container_name: node5_decision
+    command:
+      [
+        "node",
+        "decision_participant.js",
+        "--node_id",
+        "node5",
+        "--port",
+        "50052",
+        "--voting_address",
+        "node5_voting:50051",
+      ]
+    ports:
+      - "5205:50052"
+    networks:
+      - twopc-net
+
+  # Coordinator for Voting Phase (Python)
+  voting_coordinator:
+    image: twopc-voting:latest
+    container_name: voting_coordinator
+    command:
+      [
+        "python",
+        "coordinator.py",
+        "--coordinator_id",
+        "coordinator",
+        "--participants",
+        "node1_voting:50051,node2_voting:50051,node3_voting:50051,node4_voting:50051,node5_voting:50051",
+        "--transaction_id",
+        "tx123",
+      ]
+    depends_on:
+      - node1_voting
+      - node2_voting
+      - node3_voting
+      - node4_voting
+      - node5_voting
+    networks:
+      - twopc-net
+
+  # Coordinator for Decision Phase (Node.js)
+  decision_coordinator:
+    image: twopc-decision:latest
+    container_name: decision_coordinator
+    command:
+      [
+        "node",
+        "decision_coordinator.js",
+        "--coordinator_id",
+        "coordinatorNode",
+        "--transaction_id",
+        "tx123",
+        "--participants",
+        "node1_decision:50052,node2_decision:50052,node3_decision:50052,node4_decision:50052,node5_decision:50052",
+      ]
+    depends_on:
+      - node1_decision
+      - node2_decision
+      - node3_decision
+      - node4_decision
+      - node5_decision
+    networks:
+      - twopc-net
+
+networks:
+  twopc-net:
+    driver: bridge

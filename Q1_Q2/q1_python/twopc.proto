@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package twopc;
+
+// ----- Messages and Enums -----
+message VoteRequest {
+  string transaction_id = 1;
+  string coordinator_id = 2;
+}
+
+enum Vote {
+  UNKNOWN = 0;
+  COMMIT = 1;
+  ABORT = 2;
+}
+
+message VoteResponse {
+  string transaction_id = 1;
+  Vote vote = 2;
+  string participant_id = 3;
+}
+
+message VoteResponseAck {
+  string message = 1;
+}
+
+message DecisionRequest {
+  string transaction_id = 1;
+  // For global decision: COMMIT means global-commit, ABORT means global-abort.
+  Vote decision = 2;
+  string coordinator_id = 3;
+}
+
+message DecisionResponse {
+  string transaction_id = 1;
+  string participant_id = 2;
+  string status = 3;
+}
+
+message DecisionResponseAck {
+  string message = 1;
+}
+
+// Used by the decision coordinator to get a participant’s vote.
+message DecisionVoteRequest {
+  string transaction_id = 1;
+  string participant_id = 2;
+}
+
+// ----- Services -----
+//
+// The VotingService is implemented in Python (voting phase) and exposes:
+// 1. Vote – external RPC used by the coordinator to send vote requests.
+// 2. ApplyDecision – internal RPC called by the local Node decision process.
+service VotingService {
+  rpc Vote(VoteRequest) returns (VoteResponse);
+  rpc ApplyDecision(DecisionRequest) returns (DecisionResponseAck);
+}
+
+// The DecisionService is implemented in Node.js (decision phase) and exposes:
+// 1. GlobalDecision – external RPC used by the coordinator to deliver the final decision.
+// 2. ReceiveVote – internal RPC used by the local Python voting phase to forward its vote.
+// 3. GetVote – used by the coordinator decision process to collect the stored vote.
+service DecisionService {
+  rpc GlobalDecision(DecisionRequest) returns (DecisionResponse);
+  rpc ReceiveVote(VoteResponse) returns (VoteResponseAck);
+  rpc GetVote(DecisionVoteRequest) returns (VoteResponse);
+}

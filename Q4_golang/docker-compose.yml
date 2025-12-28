@@ -1,0 +1,59 @@
+services:
+  node6:
+    build:
+      context: .
+    container_name: go_node6
+    hostname: node6
+    ports:
+      - "50056:50056"
+    command: [ "./raftnode", "6" ]
+    networks:
+      - raft_net
+
+  node7:
+    build:
+      context: .
+    container_name: go_node7
+    hostname: node7
+    ports:
+      - "50057:50057"
+    command: [ "./raftnode", "7" ]
+    networks:
+      - raft_net
+
+  node8:
+    build:
+      context: .
+    container_name: go_node8
+    hostname: node8
+    ports:
+      - "50058:50058"
+    command: [ "./raftnode", "8" ]
+    networks:
+      - raft_net
+
+  node9:
+    build:
+      context: .
+    container_name: go_node9
+    hostname: node9
+    ports:
+      - "50059:50059"
+    command: [ "./raftnode", "9" ]
+    networks:
+      - raft_net
+
+  node10:
+    build:
+      context: .
+    container_name: go_node10
+    hostname: node10
+    ports:
+      - "50060:50060"
+    command: [ "./raftnode", "10" ]
+    networks:
+      - raft_net
+
+networks:
+  raft_net:
+    external: true
